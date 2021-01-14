@@ -20,46 +20,100 @@ namespace RestAPI_DOTNET_Core.Controllers
             _quoteContext = quoteContext;
         }
         // GET: api/Quotes
+        //[HttpGet]
+        //public IEnumerable<Quote> Get()
+        //{
+        //    //return new string[] { "value1", "value2" };
+        //    return _quoteContext.Quotes;
+        //}
+
         [HttpGet]
-        public IEnumerable<Quote> Get()
+        public IActionResult Get()
         {
-            //return new string[] { "value1", "value2" };
-            return _quoteContext.Quotes;
+
+            //return Ok(_quoteContext.Quotes);
+            return Ok( _quoteContext.Quotes);
         }
 
         // GET: api/Quotes/5
-        [HttpGet("{id}", Name = "Get")]
-        public Quote Get(int id)
-        {
-            return _quoteContext.Quotes.Find(id);
-        }
+        //[HttpGet("{id}", Name = "Get")]
+        //public Quote Get(int id)
+        //{
+        //    return _quoteContext.Quotes.Find(id);
+        //}
 
         // POST: api/Quotes
+        //[HttpPost]
+        //public void Post([FromBody] Quote quote)
+        //{
+        //    _quoteContext.Quotes.Add(quote);
+        //    _quoteContext.SaveChanges();
+        //}
+
         [HttpPost]
-        public void Post([FromBody] Quote quote)
+        public IActionResult Post([FromBody] Quote quote)
         {
             _quoteContext.Quotes.Add(quote);
             _quoteContext.SaveChanges();
+            return StatusCode(StatusCodes.Status201Created);
         }
 
         // PUT: api/Quotes/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] Quote quote)
+        //{
+        //   Quote retrivedRecord= _quoteContext.Quotes.Find(id);
+        //    retrivedRecord.Author = quote.Author;
+        //    retrivedRecord.Description = quote.Description;
+        //    retrivedRecord.Title = quote.Title;
+        //    _quoteContext.SaveChanges();
+        //}
+
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Quote quote)
+        public IActionResult Put(int id, [FromBody] Quote quote)
         {
-           Quote retrivedRecord= _quoteContext.Quotes.Find(id);
-            retrivedRecord.Author = quote.Author;
-            retrivedRecord.Description = quote.Description;
-            retrivedRecord.Title = quote.Title;
-            _quoteContext.SaveChanges();
+            Quote retrivedRecord = _quoteContext.Quotes.Find(id);
+            if (retrivedRecord==null)
+            {
+                return NotFound($"No records present for the ID= {id}");
+            }
+            else
+            {
+                retrivedRecord.Author = quote.Author;
+                retrivedRecord.Description = quote.Description;
+                retrivedRecord.Title = quote.Title;
+                _quoteContext.SaveChanges();
+                return Ok("Record Updated Successfully");
+            }
+            
+
         }
 
         // DELETE: api/ApiWithActions/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //    Quote retrivedRecord = _quoteContext.Quotes.Find(id);
+        //    _quoteContext.Quotes.Remove(retrivedRecord);
+        //    _quoteContext.SaveChanges();
+        //}
+
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
             Quote retrivedRecord = _quoteContext.Quotes.Find(id);
-            _quoteContext.Quotes.Remove(retrivedRecord);
-            _quoteContext.SaveChanges();
+            if (retrivedRecord == null)
+            {
+                return NotFound($"No records present for the ID= {id}");
+            }
+            else
+            {
+                //Quote retrivedRecord = _quoteContext.Quotes.Find(id);
+                _quoteContext.Quotes.Remove(retrivedRecord);
+                _quoteContext.SaveChanges();
+                return Ok("Record Deleted Successfully");
+            }
+            
         }
     }
 }
