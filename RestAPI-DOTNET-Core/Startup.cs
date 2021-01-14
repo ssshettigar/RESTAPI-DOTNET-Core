@@ -88,3 +88,16 @@ namespace RestAPI_DOTNET_Core
 
 //docker exec -it mssql_docker bash
 
+
+
+//EF core specific
+
+
+//add migration
+//dotnet ef migrations add QuotesAdded
+
+//update
+//dotnet ef database update
+
+//remove migration - dotnet ef migrations remove
+//dotnet ef migrations remove

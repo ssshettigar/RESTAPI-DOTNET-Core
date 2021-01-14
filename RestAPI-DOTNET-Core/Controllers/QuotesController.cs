@@ -82,11 +82,11 @@ namespace RestAPI_DOTNET_Core.Controllers
                 retrivedRecord.Author = quote.Author;
                 retrivedRecord.Description = quote.Description;
                 retrivedRecord.Title = quote.Title;
+                retrivedRecord.Type = quote.Type;
+                retrivedRecord.CreatedDateTime = quote.CreatedDateTime;
                 _quoteContext.SaveChanges();
                 return Ok("Record Updated Successfully");
             }
-            
-
         }
 
         // DELETE: api/ApiWithActions/5
@@ -115,5 +115,14 @@ namespace RestAPI_DOTNET_Core.Controllers
             }
             
         }
+
+        //api/Quotes/test/{id}
+        //testing attribute based routing
+        [HttpGet("[action]/{id}")]
+        public int test(int id)
+        {
+            return id;
+        }
+
     }
 }
