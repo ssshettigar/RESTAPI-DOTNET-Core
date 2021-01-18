@@ -27,13 +27,13 @@ namespace RestAPI_DOTNET_Core.Controllers
         //    return _quoteContext.Quotes;
         //}
 
-        [HttpGet]
-        public IActionResult Get()
-        {
+        //[HttpGet]
+        //public IActionResult Get()
+        //{
 
-            //return Ok(_quoteContext.Quotes);
-            return Ok( _quoteContext.Quotes);
-        }
+        //    //return Ok(_quoteContext.Quotes);
+        //    return Ok(_quoteContext.Quotes);
+        //}
 
         // GET: api/Quotes/5
         //[HttpGet("{id}", Name = "Get")]
@@ -41,6 +41,47 @@ namespace RestAPI_DOTNET_Core.Controllers
         //{
         //    return _quoteContext.Quotes.Find(id);
         //}
+
+        [HttpGet]
+        public IActionResult Get(string sort)
+        {
+            IQueryable<Quote> quotes;
+            switch (sort)
+            {
+                case "ASC":
+                    quotes= _quoteContext.Quotes.OrderBy(q => q.CreatedDateTime);
+                    break;
+                case "DESC":
+                    quotes = _quoteContext.Quotes.OrderByDescending(q => q.CreatedDateTime);
+                    break;
+                default:
+                    quotes = _quoteContext.Quotes;
+                    break;
+            }
+            return Ok(quotes);
+        }
+
+        [HttpGet("[action]")]
+        public IActionResult pageQuotes(int? pageNumber,int? pageSize)
+        {
+            IQueryable <Quote> quotes = _quoteContext.Quotes;
+
+            var currentPageNumber = pageNumber ?? 1;
+            var currentPageSize = pageSize ?? 1;
+
+            return Ok(quotes.Skip((currentPageNumber - 1) * currentPageSize).Take(currentPageSize));
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public IActionResult searchQuotes(string Type)
+        {
+            IQueryable<Quote> quotes = _quoteContext.Quotes.Where(q=>q.Type.StartsWith(Type));
+
+            
+
+            return Ok(quotes);
+        }
 
         // POST: api/Quotes
         //[HttpPost]
