@@ -42,6 +42,7 @@ namespace RestAPI_DOTNET_Core.Controllers
         //    return _quoteContext.Quotes.Find(id);
         //}
 
+        //sorting response data by using datetime stamp
         [HttpGet]
         public IActionResult Get(string sort)
         {
@@ -60,7 +61,7 @@ namespace RestAPI_DOTNET_Core.Controllers
             }
             return Ok(quotes);
         }
-
+        //pagination in API
         [HttpGet("[action]")]
         public IActionResult pageQuotes(int? pageNumber,int? pageSize)
         {
@@ -72,6 +73,7 @@ namespace RestAPI_DOTNET_Core.Controllers
             return Ok(quotes.Skip((currentPageNumber - 1) * currentPageSize).Take(currentPageSize));
         }
 
+        //searching by particular field
         [HttpGet]
         [Route("[action]")]
         public IActionResult searchQuotes(string Type)
