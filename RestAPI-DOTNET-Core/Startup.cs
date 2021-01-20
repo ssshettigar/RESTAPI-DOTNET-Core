@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -33,7 +34,8 @@ namespace RestAPI_DOTNET_Core
             //hardcoded here
             //need to explore a new way to pass through appsetting
             //how to secure the connection string
-            services.AddDbContext<QuoteDbContext>(option => option.UseSqlServer(@"Data Source=localhost;Initial Catalog=QuotesDb; User ID=sa;Password=Srikanth@123"));
+            //services.AddDbContext<QuoteDbContext>(option => option.UseSqlServer(@"Data Source=localhost;Initial Catalog=QuotesDb; User ID=sa;Password=Srikanth@123"));
+            services.AddDbContext<QuoteDbContext>(option => option.UseSqlServer(Configuration.GetConnectionString("QuoteDbContext")));
             //ability to pass XML data back to client
             //default value is JSON
             //.AddMvc().AddXmlSerializerFormatters();
@@ -42,7 +44,17 @@ namespace RestAPI_DOTNET_Core
             //    options.RespectBrowserAcceptHeader = true; // false by default
             //});
             services.AddMvc().AddXmlSerializerFormatters().AddXmlDataContractSerializerFormatters();
-            
+            services.AddResponseCaching();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = "https://srisai1986.us.auth0.com/";
+                options.Audience = "https://localhost:5001/";
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,21 +67,29 @@ namespace RestAPI_DOTNET_Core
 
             app.UseHttpsRedirection();
             //app.UseMvc();
+            app.UseAuthentication();
             app.UseRouting();
-
+            
             app.UseAuthorization();
-
+            app.UseResponseCaching();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
             //specific to API
             //only useful schema will not change
-            //quoteDbContext.Database.EnsureCreated();
+            quoteDbContext.Database.EnsureCreated();
 
             //update migration @ runtime
             //quoteDbContext.Database.Migrate();
+            
 
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute(
+            //      name: "default",
+            //      template: "{controller=Home}/{action=Index}/{id?}");
+            //});
         }
     }
 }

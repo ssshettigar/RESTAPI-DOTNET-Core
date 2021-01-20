@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RestAPI_DOTNET_Core.Models
 {
@@ -23,5 +24,7 @@ namespace RestAPI_DOTNET_Core.Models
         public string Type { get; set; }
         [Required]
         public DateTime CreatedDateTime { get; set; }
+        [JsonIgnore]
+        public string UserID { get; set; }
     }
 }

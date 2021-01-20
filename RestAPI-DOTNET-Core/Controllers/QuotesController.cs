@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestAPI_DOTNET_Core.Data;
@@ -11,6 +14,7 @@ namespace RestAPI_DOTNET_Core.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class QuotesController : ControllerBase
     {
         private QuoteDbContext _quoteContext;
@@ -21,10 +25,11 @@ namespace RestAPI_DOTNET_Core.Controllers
         }
         // GET: api/Quotes
         //[HttpGet]
-        //public IEnumerable<Quote> Get()
+        //[AllowAnonymous]
+        //public string[] Get()
         //{
-        //    //return new string[] { "value1", "value2" };
-        //    return _quoteContext.Quotes;
+        //    return new string[] { "value1", "value2" };
+        //    //return _quoteContext.Quotes;
         //}
 
         //[HttpGet]
@@ -44,6 +49,10 @@ namespace RestAPI_DOTNET_Core.Controllers
 
         //sorting response data by using datetime stamp
         [HttpGet]
+        [ResponseCache(Duration =30,Location = ResponseCacheLocation.Client)]
+            //cache location - any - stores on both server and client
+            //cache location - client - store only on client
+            //cache location - none - dont store in cache 
         public IActionResult Get(string sort)
         {
             IQueryable<Quote> quotes;
@@ -96,6 +105,8 @@ namespace RestAPI_DOTNET_Core.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Quote quote)
         {
+            string UserID = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            quote.UserID = UserID;
             _quoteContext.Quotes.Add(quote);
             _quoteContext.SaveChanges();
             return StatusCode(StatusCodes.Status201Created);
@@ -115,21 +126,33 @@ namespace RestAPI_DOTNET_Core.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Quote quote)
         {
+            string UserID = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            //quote.UserID = UserID;
+
             Quote retrivedRecord = _quoteContext.Quotes.Find(id);
-            if (retrivedRecord==null)
+            if (retrivedRecord.UserID!= UserID)
             {
-                return NotFound($"No records present for the ID= {id}");
+                return NotFound("Sorry you can't update this record!");
             }
             else
             {
-                retrivedRecord.Author = quote.Author;
-                retrivedRecord.Description = quote.Description;
-                retrivedRecord.Title = quote.Title;
-                retrivedRecord.Type = quote.Type;
-                retrivedRecord.CreatedDateTime = quote.CreatedDateTime;
-                _quoteContext.SaveChanges();
-                return Ok("Record Updated Successfully");
+                if (retrivedRecord == null)
+                {
+                    return NotFound($"No records present for the ID= {id}");
+                }
+                else
+                {
+                    retrivedRecord.Author = quote.Author;
+                    retrivedRecord.Description = quote.Description;
+                    retrivedRecord.Title = quote.Title;
+                    retrivedRecord.Type = quote.Type;
+                    retrivedRecord.CreatedDateTime = quote.CreatedDateTime;
+                    _quoteContext.SaveChanges();
+                    return Ok("Record Updated Successfully");
+                }
             }
+
+            
         }
 
         // DELETE: api/ApiWithActions/5
@@ -169,3 +192,5 @@ namespace RestAPI_DOTNET_Core.Controllers
 
     }
 }
+
+
